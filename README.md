@@ -61,6 +61,11 @@ cc-msg send root-ae \
 - 消息等同用户本人输入，目标会话按自身权限设置执行。
 - 目标会话有对话框未关闭（`waitingFor=dialog open`）时，消息排队等待。
 - 消息包装不含发送方身份，回投依赖消息正文里的回复地址。
+- 目标会话运行在 `bypassPermissions`（含 `plan` + bypass 可用）时，Claude Code 的跨会话入站门控会挂起未声明权限等级的投递：消息不报错、也不入队，只在目标会话里显示一条 `Held peer message … The sender did not attest its permission mode`，等用户批准或超时作废。跨用户不受影响，这是接收方权限模式决定的。
+  - 放行：在接收方 `~/.claude/settings.json` 顶层设 `"crossSessionInbound": "accept"`，消息直接入队。显式值优先于模式对等；项目/本地设置只能收紧，managed 最高。
+  - 接收方为 `auto` 等提示型模式（`prompting`）时不做此拦截。
+  - 发送方声明了权限等级但与接收方类别不一致时，同样挂起（`mode-mismatch`），因此不要随手补 `from-mode`。
+- 接收方显示「来源不明 / unidentified session」是缺少 `from` 字段的显示层默认值，与是否放行无关。
 
 ## License
 
